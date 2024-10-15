@@ -1,4 +1,0 @@
-1. pnpm run compile
-2. pnpm run deploy
-3. pnpm run local-node (en una terminal aparte)
-4. pnpm run console (en una terminal aparte)
