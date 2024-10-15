@@ -8,7 +8,8 @@
     "test": "hardhat test",
     "deploy": "hardhat run scripts/Deploy.ts",
     "console": "hardhat console --network localhost",
-    "local-node": "hardhat node"
+    "local-node": "hardhat node",
+    "clean-artifacts": "hardhat clean"
   },
   "keywords": [],
   "author": "",

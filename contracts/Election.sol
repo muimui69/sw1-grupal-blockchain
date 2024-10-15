@@ -4,7 +4,7 @@ pragma solidity ^0.8.27;
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 
-contract Voting {
+contract Election {
     struct Candidate {
         string candidate_name;
         string candidate_description;
