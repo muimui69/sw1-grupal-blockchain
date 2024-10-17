@@ -162,3 +162,38 @@ await verifyVoteIntegrity(election, 1); // Verificar voto de Bob
 ## Conclusión
 
 Este archivo proporciona una guía paso a paso para probar el sistema de elecciones utilizando los contratos `Tenant` y `Election`. Asegúrate de seguir cada paso en orden para garantizar que todas las funciones se ejecuten correctamente.
+
+
+
+# Cuadro Comparativo de Funcionalidades Blockchain
+
+| **Historia de Usuario (HU)**                                      | **Funcionalidad Blockchain Cubierta**                              | **Cumple** | **Detalles / Comentarios**                                            |
+|--------------------------------------------------------------------|--------------------------------------------------------------------|------------|------------------------------------------------------------------------|
+| **Emisión de Voto Segura utilizando Blockchain**                  | Uso de contratos inteligentes (`vote()` en `Election.sol`)         | ✅ Sí      | El voto se registra en la blockchain, asegurando inmutabilidad.        |
+| **Confirmación de Registro de Voto**                               | Evento `VoteConfirmed` para confirmar la transacción               | ✅ Sí      | Se emite un evento al votar para confirmar al usuario su registro.     |
+| **Verificación de Integridad de Votos en Blockchain**              | Funciones `saveCheckpoint()` y `verifyCheckpoint()`                | ✅ Sí      | Permite validar que los votos no fueron alterados mediante checkpoints.|
+| **Recuento Automático de Votos y Generación de Resultados**        | Función `getWinner()` en `Election.sol`                            | ✅ Sí      | El sistema identifica al candidato con más votos automáticamente.     |
+
+---
+
+## **Resumen de la Implementación**
+
+1. **Emisión de Voto Segura:**  
+   - **Función:** `vote()` en `Election.sol`.  
+   - **Descripción:** Los votos se registran de manera segura en la blockchain, asegurando la inmutabilidad.
+
+2. **Confirmación de Registro de Voto:**  
+   - **Evento:** `VoteConfirmed`.  
+   - **Descripción:** Al emitir un voto, se dispara un evento que confirma al votante que su voto fue registrado correctamente.
+
+3. **Verificación de Integridad:**  
+   - **Funciones:** `saveCheckpoint()` y `verifyCheckpoint()` en `Election.sol`.  
+   - **Descripción:** Cada vez que se registra un voto, se guarda un checkpoint. Luego, se puede verificar que el conteo de votos no ha sido alterado.
+
+4. **Recuento Automático y Resultados:**  
+   - **Función:** `getWinner()` en `Election.sol`.  
+   - **Descripción:** Determina al candidato ganador automáticamente al finalizar la elección, garantizando transparencia.
+
+---
+
+Con estos puntos, todas las HU que requerían **Blockchain** están cubiertas de manera satisfactoria. Si tienes algún cambio adicional o ajuste, házmelo saber.
