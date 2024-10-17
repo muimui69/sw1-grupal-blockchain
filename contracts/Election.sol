@@ -3,7 +3,6 @@ pragma solidity ^0.8.27;
 
 // Uncomment this line to use console.log
 import "hardhat/console.sol";
-
 import "./interfaces/IElection.sol";
 
 contract Election is IElection {
@@ -24,12 +23,14 @@ contract Election is IElection {
     event VoteRecorded(uint256 candidateId, uint8 newVoteCount);
 
     mapping(uint256 => Candidate) public candidates;
+    mapping(uint256 => uint8) public voteCheckpoints;
     uint256 public candidatesCount;
     address public admin;
     string public override electionName;
     string public override electionDescription;
     bool public electionEnded;
 
+    // Modificadores
     modifier onlyAdmin() {
         require(msg.sender == admin, "Only admin can perform this action");
         _;
@@ -72,6 +73,8 @@ contract Election is IElection {
         require(_candidateId < candidatesCount, "Invalid candidate ID");
         candidates[_candidateId].voteCount++;
 
+        saveCheckpoint(_candidateId);
+
         emit VoteConfirmed(
             msg.sender,
             _candidateId,
@@ -98,9 +101,9 @@ contract Election is IElection {
         )
     {
         require(electionEnded, "Election is still active");
+
         uint8 highestVotes = 0;
         uint256 winnerId = 0;
-
         for (uint256 i = 0; i < candidatesCount; i++) {
             if (candidates[i].voteCount > highestVotes) {
                 highestVotes = candidates[i].voteCount;
@@ -124,5 +127,21 @@ contract Election is IElection {
             allCandidates[i] = candidates[i];
         }
         return allCandidates;
+    }
+
+    function getNumOfCandidates() public view override returns (uint256) {
+        return candidatesCount;
+    }
+
+    // Checkpoints para validar integridad de votos
+    function saveCheckpoint(uint256 _candidateId) public onlyAdmin {
+        require(_candidateId < candidatesCount, "Invalid candidate ID");
+        voteCheckpoints[_candidateId] = candidates[_candidateId].voteCount;
+    }
+
+    function verifyCheckpoint(uint256 _candidateId) public view returns (bool) {
+        require(_candidateId < candidatesCount, "Invalid candidate ID");
+        return
+            candidates[_candidateId].voteCount == voteCheckpoints[_candidateId];
     }
 }

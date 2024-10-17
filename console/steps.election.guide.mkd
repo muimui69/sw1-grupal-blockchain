@@ -1,30 +1,40 @@
 
-# Guía de Despliegue e Interacción con los Contratos `Tenant` y `Election` 
+# Guía de Prueba de Elecciones Reales
 
-## En la consola
+## Abre una terminal
 
-Primero, asegúrate de tener los contratos `Tenant` y `Election` desplegados en la red local de Hardhat.
+1. Compila los contratos:
+   ```shell
+   pnpm run compile
+   ```
+
+2. Inicia el nodo local de Blockchain:
+   ```shell
+   pnpm run local-node
+   ```
+
+3. Abre la terminal de HardHat:
+   ```shell
+   pnpm run console
+   ```
+
+## Despliegue de Contratos
 
 ### 1. Desplegar `Election.sol`
 ```javascript
 async function deployElection() {
     const [admin] = await ethers.getSigners();
     const adminAddress = await admin.getAddress();
-
+    
     console.log(`Admin Address: ${adminAddress}`);
 
     const Election = await ethers.getContractFactory("Election");
-    const election = await Election.deploy(adminAddress, "Election 1", "First Election");
+    const election = await Election.deploy(adminAddress, "Elección Nacional", "Elección Presidencial");
     await election.waitForDeployment();
 
     console.log(`Election deployed at: ${await election.getAddress()}`);
     return election;
 }
-
-deployElection().catch((error) => {
-    console.error(error);
-    process.exit(1);
-});
 ```
 
 ### 2. Desplegar `Tenant.sol`
@@ -37,53 +47,64 @@ async function deployTenant() {
     console.log(`Tenant deployed at: ${await tenant.getAddress()}`);
     return tenant;
 }
-
-deployTenant().catch((error) => {
-    console.error(error);
-    process.exit(1);
-});
 ```
 
 ---
 
-## Ejemplos de Uso e Interacción con los Contratos
+## Operaciones con los Contratos
 
-### 1. Crear una Elección desde el Contrato Tenant
+### 1. Crear una Elección
 ```javascript
 async function createElection(tenant, subdomain, name, description) {
-    await tenant.getFunction("createElection")(subdomain, name, description);
+    await tenant.createElection(subdomain, name, description);
     console.log(`Election created for tenant: ${subdomain}`);
 }
 ```
 
-### 2. Votar por un Candidato
+### 2. Agregar un Candidato
+```javascript
+async function addCandidate(election, name, description, imgHash, email) {
+    await election.addCandidate(name, description, imgHash, email);
+    console.log(`Candidato agregado: ${name}`);
+}
+```
+
+### 3. Listar Candidatos
+```javascript
+async function listCandidates(election) {
+    const candidates = await election.getAllCandidates();
+    console.log("Candidatos:", candidates.map(c => c.toString()));
+}
+```
+
+### 4. Votar por un Candidato
 ```javascript
 async function voteForCandidate(election, candidateId) {
-    await election.getFunction("vote")(candidateId);
+    await election.vote(candidateId);
     console.log(`Votaste por el candidato con ID: ${candidateId}`);
 }
 ```
 
-### 3. Obtener Todos los Candidatos de una Elección
+### 5. Finalizar la Elección
 ```javascript
-async function getAllCandidates(election) {
-    const candidates = await election.getFunction("getAllCandidates")();
-    console.log("Candidatos:", candidates.map((c) => c.toString()));
+async function endElection(election) {
+    await election.endElection();
+    console.log("Elección finalizada.");
 }
 ```
 
-### 4. Obtener el Ganador de la Elección
+### 6. Obtener el Ganador
 ```javascript
 async function getWinner(election) {
-    const winner = await election.getFunction("getWinner")();
+    const winner = await election.getWinner();
     console.log("Candidato ganador:", winner);
 }
 ```
 
-### 5. Verificar la Integridad de un Voto con Checkpoints
+### 7. Verificar Integridad de Votos con Checkpoints
 ```javascript
 async function verifyVoteIntegrity(election, candidateId) {
-    const isValid = await election.getFunction("verifyCheckpoint")(candidateId);
+    const isValid = await election.verifyCheckpoint(candidateId);
     if (isValid) {
         console.log("El voto está íntegro.");
     } else {
@@ -94,47 +115,50 @@ async function verifyVoteIntegrity(election, candidateId) {
 
 ---
 
-## Ejemplo Completo de Flujo de Interacción
+## Datos de Prueba
 
-1. **Compila los contratos:**
-   ```shell
-   pnpm run compile
-   ```
+### Datos para Crear una Elección
+```javascript
+const tenant = await deployTenant();
+await createElection(tenant, "tenant1.example.com", "Elección General", "Descripción de la elección");
+```
 
-2. **Corre en una terminal la "red local":**
-   ```shell
-   pnpm run local-node
-   ```
+### Datos para Agregar Candidatos
+```javascript
+const election = await deployElection();
+await addCandidate(election, "Alice", "Blockchain Developer", "imgHash1", "alice@example.com");
+await addCandidate(election, "Bob", "Data Scientist", "imgHash2", "bob@example.com");
+```
 
-3. **Corre en una terminal el "modo consola", para probar los contratos:**
-   ```shell
-   pnpm run console
-   ```
+### Datos para Listar Candidatos
+```javascript
+await listCandidates(election);
+```
 
-4. **Crear una elección:**
-   ```javascript
-   const tenant = await deployTenant();
-   await createElection(tenant, "tenant1.example.com", "Elección General", "Descripción de la elección");
-   ```
+### Datos para Votar por un Candidato
+```javascript
+await voteForCandidate(election, 0); // Votar por Alice
+await voteForCandidate(election, 1); // Votar por Bob
+```
 
-5. **Votar por un candidato:**
-   ```javascript
-   const election = await deployElection();
-   await voteForCandidate(election, 0);
-   ```
+### Finalizar Elección
+```javascript
+await endElection(election);
+```
 
-6. **Obtener todos los candidatos:**
-   ```javascript
-   await getAllCandidates(election);
-   ```
+### Obtener el Ganador
+```javascript
+await getWinner(election);
+```
 
-7. **Verificar la integridad de los votos:**
-   ```javascript
-   await verifyVoteIntegrity(election, 0);
-   ```
+### Verificar Integridad de Votos
+```javascript
+await verifyVoteIntegrity(election, 0); // Verificar voto de Alice
+await verifyVoteIntegrity(election, 1); // Verificar voto de Bob
+```
 
 ---
 
 ## Conclusión
 
-Este archivo proporciona una guía clara y estructurada para desplegar e interactuar con los contratos `Tenant` y `Election`. Siguiendo estos pasos, podrás gestionar múltiples elecciones por tenant y realizar todas las operaciones necesarias.
+Este archivo proporciona una guía paso a paso para probar el sistema de elecciones utilizando los contratos `Tenant` y `Election`. Asegúrate de seguir cada paso en orden para garantizar que todas las funciones se ejecuten correctamente.
