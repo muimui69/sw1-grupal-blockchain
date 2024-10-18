@@ -26,6 +26,8 @@ contract Tenant {
             new Election(msg.sender, _electionName, _electionDescription)
         );
 
+        require(newElection != address(0), "Election deployment failed");
+
         elections[subdomain] = TenantDetails({
             deployedAddress: newElection,
             electionName: _electionName,

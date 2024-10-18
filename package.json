@@ -8,6 +8,7 @@
     "test": "hardhat test",
     "deploy": "hardhat run scripts/Deploy.ts",
     "console": "hardhat console --network localhost",
+    "zksync-testnet-console": "hardhat console --network zkSyncTestnet",
     "local-node": "hardhat node",
     "clean-artifacts": "hardhat clean"
   },
